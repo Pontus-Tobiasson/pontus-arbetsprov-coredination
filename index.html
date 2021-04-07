@@ -1,78 +1,35 @@
 <!doctype html>
 <html>
-
 <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My coredination jobs</title>
+
     <script src="https://unpkg.com/vue"></script>
-    <style>
-
-        .main-grid {
-            display: grid;
-            width: 100%;
-            gap: 20px;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: auto;
-        }
-
-        .grid {
-            height: 500px;
-            border: solid 2px gray;
-        }
-
-        .list {
-            height: 450px;
-            overflow-y: auto;
-        }
-
-        .info-item {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .head {
-            background: gray;
-            color: white;
-            font-weight: bold;
-        }
-
-        .item {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-            gap: 8px;
-            grid-template-rows: auto;
-            padding: 12px;
-            overflow: hidden;
-        }
-
-        .item:not(.head) {
-            cursor: pointer;
-            color: #303030;
-        }
-
-        .item:not(.head):hover {
-            background: #F7F7F7;
-        }
-
-        .item.selected {
-            background: aliceblue;
-        }
-
-        .item:not(.head).selected:hover {
-            background: aliceblue;
-            color: black;
-        }
-    </style>
+    <link rel="stylesheet" href="index.css">
+    <script src="index.js" defer></script>
 </head>
 
 <body>
     <main id="app">
-        <div class="main-grid">
-            <div class="grid">
-                <div class="item head"><div>Title</div><div>Priority</div><div>Description</div><div>Price</div><div>Status</div></div>
+        <div class="title">
+            <span>My coredination jobs</span>
+            <button v-on:click="refresh" title="Reload jobs from coredination server">Reload</button>
+        </div>
+        <div class="main-grid" v-if="!tokenStatus">
+            <div class="main-list">
+                <div class="item head">
+                    <div>Title</div>
+                    <div>Priority</div>
+                    <div>Description</div>
+                    <div>Price</div>
+                    <div>Status</div>
+                </div>
                 <div class="list">
                     <job-item v-for="job in jobList" v-bind:job="job" v-bind:key="job.id"></job-item>
                 </div>
             </div>
-            <div class="grid">
+            <div class="main-list">
                 <div class="info-item">
                     <div class="item head"><div>Attribute</div></div>
                     <div class="item head"><div>Value</div></div>
@@ -80,91 +37,21 @@
                 <div class="list">
                     <div style="margin-top: 20px;" v-for="(value, name) in selected">
                         <div class="info-item" style="margin: 8px" v-if="name != 'id' && name != 'selected'">
-                            <div>{{name}}</div>
-                            <div>{{value}}</div>
+                            <div>{{ name }}</div>
+                            <div>{{ value }}</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <button v-on:click="setToken()" v-if="tokenStatus">Refresh</button>
-        <div style="margin-top: 20px;" >{{tokenStatus}}</div>
-        <input v-model="API_Token" v-if="tokenStatus" placeholder="Please enter a valid token">
+        <div class="no-token" v-if="tokenStatus">
+            <div class="title">Coredination token is invalid</div>
+            <div>
+                <input v-model="API_Token" v-if="tokenStatus" placeholder="Please enter a valid token">
+                <button v-on:click="setToken()" title="Refresh token">Refresh</button>
+            </div>
+        </div>
     </main>
 </body>
-
-<script>
-    const serverAddress = "http://localhost:8080"
-
-    Vue.component('job-item', {
-        props: ['job'],
-        template: '<div class="item" v-bind:class="{ selected: job.selected }" v-on:click="selectJob(job)"><div>{{ job.title }}</div><div>{{ job.priority }}</div><div>{{ job.description }}</div><div>{{ (job.pendingInvoicingPrice/100) }}$</div><div>{{ job.state }}</div></div>',
-        methods: {
-            selectJob: function(job) {
-                if (app.selected) {
-                    app.selected.selected = false;
-                }
-                app.selected = job;
-                if (app.selected) {
-                    app.selected.selected = true;
-                }
-            }
-        }
-    });
-
-    const app = new Vue({
-        el: '#app',
-        data: {
-            jobList: [],
-            selected: null,
-            API_Token: "",
-            tokenStatus: ""
-        },
-        methods: {
-            setToken: function() {
-                console.log("Attempting to set token to " + app.API_Token);
-                fetch(serverAddress+"/token/"+app.API_Token, { method: 'POST' })
-                    .then(response => {
-                        response.json().then(data => {
-                            console.log(data);
-                            app.refresh();
-                        });
-                    })
-                    .catch(function(error) {
-                        console.error(error);
-                    });
-            },
-            refresh: function() {  
-                fetch(serverAddress + "/job", { method: 'GET' })
-                .then(response => {
-                     console.log(response);
-                     response.json().then(data => {
-                        console.log(data);
-                        if (data === "Invalid token") {
-                            app.tokenStatus = "Token required";
-                        }
-                        else {
-                            app.tokenStatus = "";
-                            app.jobList = [];
-                            let jobs = JSON.parse(data);
-                            for (job in jobs) {
-                                console.log(jobs[job]);
-                                let entry =  jobs[job];
-                                entry.id = job;
-                                entry.selected = false;
-                                app.jobList.push(entry);
-                            }
-                        }   
-                    });
-                })
-                .catch(function(error) {
-                    console.log(error);
-                })
-            } 
-        }
-    });
-    app.refresh();
-
-</script>
 
 </html>
