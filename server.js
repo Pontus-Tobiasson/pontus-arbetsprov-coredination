@@ -3,7 +3,7 @@ const bodyParser = require('body-parser')
 const fetch = require('node-fetch');
 
 const port = process.env.PORT || 8080;
-let API_Token = "basbhg";
+let API_Token = process.env.API_Token;
 
 const app = express();
 
