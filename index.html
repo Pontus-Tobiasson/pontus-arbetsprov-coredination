@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+
+<head>
+    <script src="https://unpkg.com/vue"></script>
+    <style>
+        .grid {
+            width: 1000px;
+            border: solid 2px gray;
+        }
+
+        .head {
+            background: gray;
+            color: white;
+            font-weight: bold;
+        }
+
+        .item {
+            display: grid;
+            grid-template-columns: 200px 200px 200px 200px 200px;
+            grid-template-rows: auto;
+            padding: 12px;
+            overflow: hidden;
+        }
+
+        .item:not(.head) {
+            cursor: pointer;
+            color: #303030;
+        }
+
+        .item:not(.head):hover {
+            background: #F7F7F7;
+        }
+
+        .item.selected {
+            background: aliceblue;
+        }
+
+        .item:not(.head).selected:hover {
+            background: aliceblue;
+            color: black;
+        }
+    </style>
+</head>
+
+<body>
+    <main id="app">
+        <div class="grid">
+            <div class="item head"><div>Title</div><div>Priority</div><div>Description</div><div>Price</div><div>Status</div></div>
+            <todo-item v-for="todo in todos" v-bind:todo="todo" v-bind:key="todo.id"></todo-item>
+        </div>
+        <div style="margin-top: 20px;" v-if="selected">Selected: {{selected}}</div>
+    </main>
+</body>
+
+<script>
+
+    Vue.component('todo-item', {
+        props: ['todo'], // title, priority, placeName, pendingInvoicingPrice, state
+        template: '<div class="item" v-bind:class="{ selected: todo.selected }" v-on:click="selectTodo(todo)"><div>{{ todo.title }}</div><div>{{ todo.priority }}</div><div>{{ todo.description }}</div><div>{{ (todo.pendingInvoicingPrice/100) }}$</div><div>{{ todo.state }}</div></div>',
+        methods: {
+            selectTodo: function(todo) {
+                if (app.selected) {
+                    app.selected.selected = false;
+                }
+                app.selected = todo;
+                if (app.selected) {
+                    app.selected.selected = true;
+                }
+            }
+        }
+    });
+
+    const app = new Vue({
+        el: '#app',
+        data: {
+            //todos: [{id: 'foo', name: 'kalle', selected: false}, {id: 'bar', name: 'balle', selected: false}, {id: 'baz', name: 'olle', selected: false}],
+            todos: [],
+            selected: null
+        }
+    });
+
+    serverAddress = ""; //"http://localhost:8080";
+    fetch(serverAddress + "/job", { method: 'GET' })
+    .then(response => {
+        response.json().then(data => {
+            let jobs = JSON.parse(data);
+            for (job in jobs) {
+                console.log(jobs[job]);
+                let entry =  jobs[job];
+                entry.id = job;
+                app.todos.push(entry);
+            }
+        });
+    })
+    .catch(function(error) {
+        console.log(error);
+    })
+
+</script>
+
+</html>
