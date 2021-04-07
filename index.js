@@ -35,13 +35,10 @@ const app = new Vue({
 
     methods: {
         setToken: function() {
-            console.log("Attempting to set token to " + app.API_Token);
             fetch('/token/' + app.API_Token, { method: 'POST' })
-                .then(response => {
-                    response.json().then(data => {
-                        console.log(data);
-                        app.refresh();
-                    });
+                .then(response => response.json())
+                .then(data => {
+                    app.refresh();
                 })
                 .catch(function(error) {
                     console.error(error);
@@ -65,6 +62,7 @@ const app = new Vue({
                         app.jobList.push(entry);
                     }
                     app.selected = app.jobList[0];
+                    app.selected.selected = true;
                 }
             })
             .catch(function(error) {

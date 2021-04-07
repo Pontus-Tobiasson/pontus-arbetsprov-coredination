@@ -3,7 +3,7 @@ const bodyParser = require('body-parser')
 const fetch = require('node-fetch');
 
 const port = process.env.PORT || 8080;
-let API_Token = process.env.API_Token;
+let API_Token = "basbhg";
 
 const app = express();
 
@@ -56,10 +56,9 @@ app.get('*', (req, res) => {
 });
 
 app.post('/token/:newToken', (req, res) => {
-    console.log("NEW TOKEN");
+    console.log("New token recieved");
     const {newToken} = req.params;
     API_Token = newToken;
-    console.log(API_Token);
     res.json(API_Token);
 });
 
