@@ -1,11 +1,7 @@
 const port = process.env.PORT || 8080;
-var http = require('http');
 const express = require('express');
-var url = require('url');
 const bodyParser = require('body-parser')
 const fetch = require('node-fetch');
-const {gzip, ungzip} = require('node-gzip');
-const zlib = require('zlib');
 
 const API_Key = "9a06310e-9a47-4799-8e9b-0bd3f36e8d4d";
 const Token = "d314f993-7159-4676-93c6-7ce07fd63652";
